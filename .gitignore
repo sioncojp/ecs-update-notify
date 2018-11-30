@@ -1,0 +1,15 @@
+_vendor
+.vendor
+vendor
+_vendor-*
+*.pid
+bin/ecs-update-notify
+*.swp
+.DS_Store
+tmp/*
+
+### Other ###
+.idea/
+
+### .gitkeep ###
+!.gitkeep

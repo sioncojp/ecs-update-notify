@@ -1,0 +1,13 @@
+interval = 30
+
+[[monitor]]
+name = "FooCluster"
+aws_profile = "foo"
+aws_region = "ap-northeast-1"
+incoming_webhook = "https://hooks.slack.com/services/....."
+
+[[monitor]]
+name = "BarCluster"
+aws_profile = "bar"
+aws_region = "ap-northeast-1"
+incoming_webhook = "https://hooks.slack.com/services/....."
