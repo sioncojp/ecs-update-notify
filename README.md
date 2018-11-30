@@ -36,7 +36,7 @@ With this solution, the task notifies only creation and deletion.
 
 This is very difficult to understand as people see it.
 
-This is to notify you only when the new container has replaced at the ALB level.
+ecs-update-notify is to notify you only when the new container has replaced at the ALB level.
 
 # License
 The MIT License
