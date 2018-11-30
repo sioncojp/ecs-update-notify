@@ -7,6 +7,7 @@ bin/ecs-update-notify
 *.swp
 .DS_Store
 tmp/*
+bin/
 
 ### Other ###
 .idea/

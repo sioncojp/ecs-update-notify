@@ -19,6 +19,9 @@ dist: build-cross ## create .tar.gz linux & darwin to /bin
 build: ## go build
 	go build -o bin/$(name) $(LDFLAGS) cmd/$(name)/*.go
 
+docker-build: ## go build on Docker
+	@docker run --rm -v "$(PWD)":/go/src/github.com/sioncojp/$(name) -w /go/src/github.com/sioncojp/$(name) golang:latest bash build.sh
+
 test: ## go test
 	go test -v $$(go list ./... | grep -v /vendor/)
 
