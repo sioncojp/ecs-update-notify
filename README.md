@@ -1,4 +1,5 @@
 # ecs-update-notify
+![](docs/ecs-update-notify.png)
 
 When updating the task with ecs, let me notify you when the task is replaced at ALB level.
 
