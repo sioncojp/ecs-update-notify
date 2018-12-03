@@ -8,19 +8,19 @@ name		:= ecs-update-notify
 linux_name	:= $(name)-linux-amd64
 darwin_name	:= $(name)-darwin-amd64
 
-build-cross: ## create to build for linux & darwin to bin/
-	GOOS=linux GOARCH=amd64 go build -o bin/$(linux_name) $(LDFLAGS) cmd/$(name)/*.go
-	GOOS=darwin GOARCH=amd64 go build -o bin/$(darwin_name) $(LDFLAGS) cmd/$(name)/*.go
-
-dist: build-cross ## create .tar.gz linux & darwin to /bin
+dist: build-docker ## create .tar.gz linux & darwin to /bin
 	cd bin && tar zcvf $(linux_name).tar.gz $(linux_name) && rm -f $(linux_name)
 	cd bin && tar zcvf $(darwin_name).tar.gz $(darwin_name) && rm -f $(darwin_name)
 
 build: ## go build
 	go build -o bin/$(name) $(LDFLAGS) cmd/$(name)/*.go
 
-docker-build: ## go build on Docker
-	@docker run --rm -v "$(PWD)":/go/src/github.com/sioncojp/$(name) -w /go/src/github.com/sioncojp/$(name) golang:latest bash build.sh
+build-cross: ## create to build for linux & darwin to bin/
+	GOOS=linux GOARCH=amd64 go build -o bin/$(linux_name) $(LDFLAGS) cmd/$(name)/*.go
+	GOOS=darwin GOARCH=amd64 go build -o bin/$(darwin_name) $(LDFLAGS) cmd/$(name)/*.go
+
+build-docker: ## go build on Docker
+	docker run --rm -v "$(PWD)":/go/src/github.com/sioncojp/$(name) -w /go/src/github.com/sioncojp/$(name) golang:latest bash build.sh
 
 test: ## go test
 	go test -v $$(go list ./... | grep -v /vendor/)
