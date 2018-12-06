@@ -63,12 +63,12 @@ func (e *ECSTask) NewAttachmentMessage(taskDefiniton *ecs.TaskDefinition, awsPro
 	return &Attachment{
 		"#F6D64F",
 		"ECS Update Notify",
-		fmt.Sprintf("%s task updated: %d in %s\n"+
+		fmt.Sprintf("%s task updated: %d\n"+
 			"CPU: %s, MEM: %sGB\n"+
 			"Image: \n"+
 			"```"+
 			"%s"+
-			"```", task, revision, awsProfile, cpu, memory, strings.Join(images, "\n")),
-		fmt.Sprintf("%s cluster", cluster),
+			"```", task, revision, cpu, memory, strings.Join(images, "\n")),
+		fmt.Sprintf("%s cluster in %s", cluster, awsProfile),
 	}
 }
