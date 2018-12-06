@@ -17,7 +17,7 @@ func (m *Monitor) PostSlackMessage() {
 	for _, t := range m.Tasks {
 		if !t.isCurrReivision {
 			td := m.DescribeTaskDefinition(t.TaskDefinitionArn).TaskDefinition
-			a := t.NewAttachmentMessage(td, m.Name, t.Name, t.NextRevision)
+			a := t.NewAttachmentMessage(td, m.AWSProfile, m.Name, t.Name, t.NextRevision)
 
 			// post slack
 			m.postSlackMessage(a)
@@ -50,7 +50,7 @@ func (m *Monitor) postSlackMessage(a *Attachment) {
 }
 
 // NewAttachmentMessage ... Initialize attachment data of slack
-func (e *ECSTask) NewAttachmentMessage(taskDefiniton *ecs.TaskDefinition, cluster, task string, revision int) *Attachment {
+func (e *ECSTask) NewAttachmentMessage(taskDefiniton *ecs.TaskDefinition, awsProfile, cluster, task string, revision int) *Attachment {
 	var images []string
 
 	cpu := *taskDefiniton.Cpu
@@ -63,12 +63,12 @@ func (e *ECSTask) NewAttachmentMessage(taskDefiniton *ecs.TaskDefinition, cluste
 	return &Attachment{
 		"#F6D64F",
 		"ECS Update Notify",
-		fmt.Sprintf("%s task updated: %d\n"+
+		fmt.Sprintf("%s task updated: %d in %s\n"+
 			"CPU: %s, MEM: %sGB\n"+
 			"Image: \n"+
 			"```"+
 			"%s"+
-			"```", task, revision, cpu, memory, strings.Join(images, "\n")),
+			"```", task, revision, awsProfile, cpu, memory, strings.Join(images, "\n")),
 		fmt.Sprintf("%s cluster", cluster),
 	}
 }
