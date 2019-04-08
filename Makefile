@@ -2,7 +2,7 @@ REVISION := $(shell git describe --always)
 DATE := $(shell date +%Y-%m-%dT%H:%M:%S%z)
 LDFLAGS	:= -ldflags="-X \"main.Revision=$(REVISION)\" -X \"main.BuildDate=${DATE}\""
 
-.PHONY: build-cross dist build deps deps/update clean run help
+.PHONY: build-cross dist build clean run help
 
 name		:= ecs-update-notify
 linux_name	:= $(name)-linux-amd64
@@ -24,15 +24,6 @@ build-docker: ## go build on Docker
 
 test: ## go test
 	go test -v $$(go list ./... | grep -v /vendor/)
-
-dep: ## dep ensure
-	dep ensure
-
-dep/init: ## dep init
-	dep init
-
-dep/update: ## dep update
-	dep ensure -update
 
 clean: ## remove bin/*
 	rm -f bin/*
