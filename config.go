@@ -14,7 +14,7 @@ const (
 var (
 	pid                  = "/tmp/ecs-update-notify.pid"
 	log                  Logger
-	CheckFailureInterval = 20
+	CheckFailureInterval = 30
 )
 
 // Config ... config.toml
