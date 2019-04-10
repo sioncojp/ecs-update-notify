@@ -31,7 +31,6 @@ func (m *Monitor) PostSlackMessage() {
 			}
 			if t.NextRevision != t.CurrRevision {
 				t.FailureCount++
-				fmt.Println(t.FailureCount)
 				break
 			}
 		} else {
@@ -42,11 +41,11 @@ func (m *Monitor) PostSlackMessage() {
 
 			// reset
 			t.CurrRevision = t.NextRevision
+			t.FailureCount = 1
 		}
 
 		// reset
 		t.isCurrReivision = false
-		t.FailureCount = 1
 	}
 }
 

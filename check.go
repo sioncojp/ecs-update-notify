@@ -59,7 +59,7 @@ func (m *Monitor) CheckClusterUpdate() {
 		}
 
 		// Check all tasks and set value to struct
-		m.CheckTasksUpdate(task, v.TaskDefinitionArn, revision, v.LastStatus)
+		m.CheckTasksUpdate(task, v.TaskDefinitionArn, revision)
 	}
 
 	// Notification when Revision is updated
@@ -67,7 +67,7 @@ func (m *Monitor) CheckClusterUpdate() {
 }
 
 // CheckTasksUpdate ... Check all tasks and set value to struct
-func (m *Monitor) CheckTasksUpdate(task string, taskDefinitionArn *string, revision int, l *string) {
+func (m *Monitor) CheckTasksUpdate(task string, taskDefinitionArn *string, revision int) {
 	for _, t := range m.Tasks {
 		if t.Name == task {
 			if t.CurrRevision == revision {
