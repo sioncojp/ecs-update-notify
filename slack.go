@@ -106,10 +106,11 @@ func (e *ECSFailureTask) NewAttachmentMessage(taskDefinition *ecs.TaskDefinition
 	return &Attachment{
 		ColorRED,
 		"ECS Update Notify",
-		fmt.Sprintf("%s task failure: %d\n"+
-			"Image: \n"+
+		fmt.Sprintf("if task failure???\n"+
+			"please Check the ECS Task\n"+
 			"```"+
-			"%s"+
+			"Task: : %s:%d"+
+			"Image: %s"+
 			"```", task, revision, strings.Join(images, "\n")),
 		fmt.Sprintf("%s cluster in %s", cluster, awsProfile),
 	}
