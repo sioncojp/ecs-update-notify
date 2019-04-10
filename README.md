@@ -1,6 +1,8 @@
 # ecs-update-notify
 ![](docs/ecs-update-notify.png)
 
+![](docs/ecs-update-notify_2.png)
+
 When updating the task with ecs, let me notify you when the task is replaced at ALB level.
 
 ## Usage
@@ -15,6 +17,7 @@ make build
 
 ```
 interval = 30
+check_failure_interval = 30
 
 [[monitor]]
 name = "FooCluster"

@@ -31,7 +31,6 @@ func (m *Monitor) PostSlackMessage() {
 			}
 			if t.NextRevision != t.CurrRevision {
 				t.FailureCount++
-				break
 			}
 		} else {
 			// notify success
