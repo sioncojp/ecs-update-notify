@@ -12,21 +12,43 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecs"
 )
 
+type SlackMessage interface {
+	NewAttachmentMessage(taskDefiniton *ecs.TaskDefinition, awsProfile, cluster, task string, revision int) *Attachment
+}
+
 // PostSlackMessage ... Verify the revision number and notify the message
 func (m *Monitor) PostSlackMessage() {
 	for _, t := range m.Tasks {
-		if !t.isCurrReivision {
-			td := m.DescribeTaskDefinition(t.TaskDefinitionArn).TaskDefinition
-			a := t.NewAttachmentMessage(td, m.AWSProfile, m.Name, t.Name, t.NextRevision)
+		td := m.DescribeTaskDefinition(t.TaskDefinitionArn).TaskDefinition
 
-			// post slack
-			m.postSlackMessage(a)
+		// notify failure
+		if t.isCurrReivision && (t.FailureCount%CheckFailureInterval) == 0 {
+			e := &ECSFailureTask{}
+			failure := e.NewAttachmentMessage(td, m.AWSProfile, m.Name, t.Name, t.NextRevision)
+
+			m.postSlackMessage(failure)
+
+		}
+
+		if t.NextRevision != t.CurrRevision {
+			t.FailureCount++
+			fmt.Println(t.FailureCount)
+			break
+		}
+
+		// notify success
+		if !t.isCurrReivision {
+			success := t.NewAttachmentMessage(td, m.AWSProfile, m.Name, t.Name, t.NextRevision)
+
+			m.postSlackMessage(success)
 
 			// reset
 			t.CurrRevision = t.NextRevision
 		}
+
 		// reset
 		t.isCurrReivision = false
+		t.FailureCount = 1
 	}
 }
 
@@ -49,19 +71,19 @@ func (m *Monitor) postSlackMessage(a *Attachment) {
 	defer resp.Body.Close()
 }
 
-// NewAttachmentMessage ... Initialize attachment data of slack
-func (e *ECSTask) NewAttachmentMessage(taskDefiniton *ecs.TaskDefinition, awsProfile, cluster, task string, revision int) *Attachment {
+// NewAttachmentMessage ... Initialize attachment data of slack for change task message
+func (e *ECSTask) NewAttachmentMessage(taskDefinition *ecs.TaskDefinition, awsProfile, cluster, task string, revision int) *Attachment {
 	var images []string
 
-	cpu := *taskDefiniton.Cpu
-	memory := *taskDefiniton.Memory
+	cpu := *taskDefinition.Cpu
+	memory := *taskDefinition.Memory
 
-	for _, i := range taskDefiniton.ContainerDefinitions {
+	for _, i := range taskDefinition.ContainerDefinitions {
 		images = append(images, *i.Image)
 	}
 
 	return &Attachment{
-		"#F6D64F",
+		ColorORANGE,
 		"ECS Update Notify",
 		fmt.Sprintf("%s task updated: %d\n"+
 			"CPU: %s, MEM: %sGB\n"+
@@ -69,6 +91,26 @@ func (e *ECSTask) NewAttachmentMessage(taskDefiniton *ecs.TaskDefinition, awsPro
 			"```"+
 			"%s"+
 			"```", task, revision, cpu, memory, strings.Join(images, "\n")),
+		fmt.Sprintf("%s cluster in %s", cluster, awsProfile),
+	}
+}
+
+// NewAttachmentMessage ... Initialize attachment data of slack for failure messages
+func (e *ECSFailureTask) NewAttachmentMessage(taskDefinition *ecs.TaskDefinition, awsProfile, cluster, task string, revision int) *Attachment {
+	var images []string
+
+	for _, i := range taskDefinition.ContainerDefinitions {
+		images = append(images, *i.Image)
+	}
+
+	return &Attachment{
+		ColorRED,
+		"ECS Update Notify",
+		fmt.Sprintf("%s task failure: %d\n"+
+			"Image: \n"+
+			"```"+
+			"%s"+
+			"```", task, revision, strings.Join(images, "\n")),
 		fmt.Sprintf("%s cluster in %s", cluster, awsProfile),
 	}
 }

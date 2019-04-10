@@ -51,6 +51,11 @@ func Start(ctx context.Context, file string, exitCh chan int) {
 		log.sugar.Fatalf("failed to load toml file: %s\n", file)
 	}
 
+	// initialize CheckFailureCount
+	if config.CheckFailureInterval != 0 {
+		CheckFailureInterval = config.CheckFailureInterval
+	}
+
 	// check update
 	go func() {
 		for {

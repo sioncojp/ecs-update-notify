@@ -6,15 +6,22 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	ColorORANGE = "#F6D64F"
+	ColorRED    = "#F08080"
+)
+
 var (
-	pid = "/tmp/ecs-update-notify.pid"
-	log Logger
+	pid                  = "/tmp/ecs-update-notify.pid"
+	log                  Logger
+	CheckFailureInterval = 20
 )
 
 // Config ... config.toml
 type Config struct {
-	Interval int        `toml:"interval"`
-	Monitors []*Monitor `toml:"monitor"`
+	Interval             int        `toml:"interval"`
+	CheckFailureInterval int        `toml:"check_failure_interval"`
+	Monitors             []*Monitor `toml:"monitor"`
 }
 
 // Monitor ... set from config.toml
@@ -39,11 +46,18 @@ type Logger struct {
 
 // ECSTask ...
 type ECSTask struct {
+	SlackMessage
 	Name              string
 	CurrRevision      int
 	NextRevision      int
 	isCurrReivision   bool
 	TaskDefinitionArn *string
+	FailureCount      int
+}
+
+// ECSFailureTask ...
+type ECSFailureTask struct {
+	SlackMessage
 }
 
 // Slack ... Store Attachment information
