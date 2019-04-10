@@ -1,5 +1,5 @@
 interval = 30
-check_failure_interval = 30 # default: 20
+check_failure_interval = 20 # default: 20
 
 [[monitor]]
 name = "FooCluster"
