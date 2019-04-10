@@ -21,23 +21,21 @@ func (m *Monitor) PostSlackMessage() {
 	for _, t := range m.Tasks {
 		td := m.DescribeTaskDefinition(t.TaskDefinitionArn).TaskDefinition
 
-		// notify failure
-		if t.isCurrReivision && (t.FailureCount%CheckFailureInterval) == 0 {
-			e := &ECSFailureTask{}
-			failure := e.NewAttachmentMessage(td, m.AWSProfile, m.Name, t.Name, t.NextRevision)
+		if t.isCurrReivision {
+			// notify failure
+			if (t.FailureCount % CheckFailureInterval) == 0 {
+				e := &ECSFailureTask{}
+				failure := e.NewAttachmentMessage(td, m.AWSProfile, m.Name, t.Name, t.NextRevision)
 
-			m.postSlackMessage(failure)
-
-		}
-
-		if t.NextRevision != t.CurrRevision {
-			t.FailureCount++
-			fmt.Println(t.FailureCount)
-			break
-		}
-
-		// notify success
-		if !t.isCurrReivision {
+				m.postSlackMessage(failure)
+			}
+			if t.NextRevision != t.CurrRevision {
+				t.FailureCount++
+				fmt.Println(t.FailureCount)
+				break
+			}
+		} else {
+			// notify success
 			success := t.NewAttachmentMessage(td, m.AWSProfile, m.Name, t.Name, t.NextRevision)
 
 			m.postSlackMessage(success)
