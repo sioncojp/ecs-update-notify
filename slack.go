@@ -9,6 +9,7 @@ import (
 
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 )
 
@@ -70,9 +71,12 @@ func (m *Monitor) postSlackMessage(a *Attachment) {
 // NewAttachmentMessage ... Initialize attachment data of slack for change task message
 func (e *ECSTask) NewAttachmentMessage(taskDefinition *ecs.TaskDefinition, awsProfile, cluster, task string, revision int) *Attachment {
 	var images []string
+	var cpu, memory int64
 
-	cpu := *taskDefinition.Cpu
-	memory := *taskDefinition.Memory
+	for _, v := range taskDefinition.ContainerDefinitions {
+		cpu = aws.Int64Value(v.Cpu)
+		memory = aws.Int64Value(v.Memory)
+	}
 
 	for _, i := range taskDefinition.ContainerDefinitions {
 		images = append(images, *i.Image)
@@ -82,7 +86,7 @@ func (e *ECSTask) NewAttachmentMessage(taskDefinition *ecs.TaskDefinition, awsPr
 		ColorORANGE,
 		"ECS Update Notify",
 		fmt.Sprintf("%s task updated: %d\n"+
-			"CPU: %s, MEM: %sGB\n"+
+			"CPU: %d, MEM: %dGB\n"+
 			"Image: \n"+
 			"```"+
 			"%s"+

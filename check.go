@@ -32,6 +32,11 @@ func (c *Config) CheckUpdate() {
 
 // CheckClusterUpdate ... Check update of task in cluster
 func (m *Monitor) CheckClusterUpdate() {
+	// initialize for nil pointer
+	if len(m.Tasks) == 0 {
+		m.Tasks = []*ECSTask{}
+	}
+
 	m.Client = m.NewClient()
 
 	tasks := m.ListTasks()
@@ -46,8 +51,9 @@ func (m *Monitor) CheckClusterUpdate() {
 		taskDefinition := strings.Split(*v.TaskDefinitionArn, "/")[1]
 		task := strings.Split(taskDefinition, ":")[0]
 		revision, _ := strconv.Atoi(strings.Split(taskDefinition, ":")[1])
-		// initialize
-		if len(m.Tasks) == 0 {
+
+		// first initialize
+		if !IsContainsTaskName(task, m.Tasks) {
 			m.Tasks = append(m.Tasks, &ECSTask{
 				Name:              task,
 				CurrRevision:      revision,
@@ -78,4 +84,14 @@ func (m *Monitor) CheckTasksUpdate(task string, taskDefinitionArn *string, revis
 			}
 		}
 	}
+}
+
+// IsContainsTaskName ... ECSTask contains the specified task name
+func IsContainsTaskName(task string, tasks []*ECSTask) bool {
+	for _, t := range tasks {
+		if task == t.Name {
+			return true
+		}
+	}
+	return false
 }
