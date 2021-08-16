@@ -9,7 +9,6 @@ import (
 
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 )
 
@@ -71,15 +70,9 @@ func (m *Monitor) postSlackMessage(a *Attachment) {
 // NewAttachmentMessage ... Initialize attachment data of slack for change task message
 func (e *ECSTask) NewAttachmentMessage(taskDefinition *ecs.TaskDefinition, awsProfile, cluster, task string, revision int) *Attachment {
 	var images []string
-	var cpu, memory int64
 
 	for _, v := range taskDefinition.ContainerDefinitions {
-		cpu = aws.Int64Value(v.Cpu)
-		memory = aws.Int64Value(v.Memory)
-	}
-
-	for _, i := range taskDefinition.ContainerDefinitions {
-		images = append(images, *i.Image)
+		images = append(images, *v.Image)
 	}
 
 	return &Attachment{
@@ -90,7 +83,7 @@ func (e *ECSTask) NewAttachmentMessage(taskDefinition *ecs.TaskDefinition, awsPr
 			"Image: \n"+
 			"```"+
 			"%s"+
-			"```", task, revision, cpu, memory, strings.Join(images, "\n")),
+			"```", task, revision, taskDefinition.Cpu, taskDefinition.Memory, strings.Join(images, "\n")),
 		fmt.Sprintf("%s cluster in %s", cluster, awsProfile),
 	}
 }
