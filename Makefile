@@ -1,38 +1,61 @@
 REVISION := $(shell git describe --always)
-DATE := $(shell date +%Y-%m-%dT%H:%M:%S%z)
-LDFLAGS	:= -ldflags="-X \"main.Revision=$(REVISION)\" -X \"main.BuildDate=${DATE}\""
+LDFLAGS	 := -ldflags="-X \"main.Revision=$(REVISION)\""
 
-.PHONY: build-cross dist build clean run help
+.PHONY: build-cross dist build clean run help go/* build
 
 name		:= ecs-update-notify
 linux_name	:= $(name)-linux-amd64
 darwin_name	:= $(name)-darwin-amd64
+darwin_arm_name	:= $(name)-darwin-arm64
+
+go_version := $(shell cat $(realpath .go-version))
+bindir     := $(realpath bin/)
+go         := $(BINDIR)/go/bin/go
+arch       := $(shell arch)
+
+help:
+	@awk -F ':|##' '/^[^\t].+?:.*?##/ { printf "\033[36m%-22s\033[0m %s\n", $$1, $$NF }' $(MAKEFILE_LIST)
+
+### go install
+go/install: file         = go.tar.gz
+go/install: download_url = https://golang.org/dl/go$(GO_VERSION).darwin-$(ARCH).tar.gz
+go/install:
+# If you have a different version, delete it.
+	@if [ -f $(go) ]; then \
+		$(go) version | grep -q "$(go_version)" || rm -f $(bindir)/go; \
+	fi
+
+# If the file is not there, download it.
+	@if [ ! -f $(go) ]; then \
+		curl -L -fsS --retry 2 -o $(file) $(download_url) && \
+		tar zxvf $(file) -C $(bindir) && rm -f $(file); \
+	fi
 
 dist: build-docker ## create .tar.gz linux & darwin to /bin
 	cd bin && tar zcvf $(linux_name).tar.gz $(linux_name) && rm -f $(linux_name)
 	cd bin && tar zcvf $(darwin_name).tar.gz $(darwin_name) && rm -f $(darwin_name)
-
-build: ## go build
-	go build -o bin/$(name) $(LDFLAGS) cmd/$(name)/*.go
-
-build-cross: ## create to build for linux & darwin to bin/
-	GOOS=linux GOARCH=amd64 go build -o bin/$(linux_name) $(LDFLAGS) cmd/$(name)/*.go
-	GOOS=darwin GOARCH=amd64 go build -o bin/$(darwin_name) $(LDFLAGS) cmd/$(name)/*.go
-
-build-docker: ## go build on Docker
-	docker run --rm -v "$(PWD)":/go/src/github.com/sioncojp/$(name) -w /go/src/github.com/sioncojp/$(name) golang:latest bash build.sh
+	cd bin && tar zcvf $(darwin_arch_name).tar.gz $(darwin_arch_name) && rm -f $(darwin_arch_name)
 
 test: ## go test
-	go test -v $$(go list ./... | grep -v /vendor/)
+	$(go) test -v $$(go list ./... | grep -v /vendor/)
 
 clean: ## remove bin/*
 	rm -f bin/*
 
-run: ## go run
-	go run cmd/$(name)/main.go -c examples/config.toml
-
 lint: ## go lint ignore vendor
-	golint $(go list ./... | grep -v /vendor/)
+	golint $($(go) list ./... | grep -v /vendor/)
 
-help:
-	@awk -F ':|##' '/^[^\t].+?:.*?##/ { printf "\033[36m%-22s\033[0m %s\n", $$1, $$NF }' $(MAKEFILE_LIST)
+
+build: go/install ## build
+	$(go) build -o $(bindir)/$(name) *.go
+
+build/cross: go/install ## create to build for linux & darwin to bin/
+	GOOS=linux GOARCH=amd64 $(go) build -o bin/$(linux_name) $(LDFLAGS) cmd/$(name)/*.go
+	GOOS=darwin GOARCH=amd64 $(go) build -o bin/$(darwin_name) $(LDFLAGS) cmd/$(name)/*.go
+	GOOS=darwin GOARCH=arm64 $(go) build -o bin/$(darwin_arm_name) $(LDFLAGS) cmd/$(name)/*.go
+
+build-docker: ## go build on Docker
+	docker run --rm -v "$(PWD)":/go/src/github.com/sioncojp/$(name) -w /go/src/github.com/sioncojp/$(name) golang:latest bash build.sh
+
+run: ## go run
+	$(go) run cmd/$(name)/main.go -c examples/config.toml
