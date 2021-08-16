@@ -3,6 +3,10 @@ package ecsupdatenotify
 import (
 	"strings"
 
+	"github.com/aws/aws-sdk-go/service/ecs"
+
+	"github.com/aws/aws-sdk-go/aws"
+
 	"strconv"
 
 	"sync"
@@ -44,7 +48,19 @@ func (m *Monitor) CheckClusterUpdate() {
 		log.sugar.Warnf("task is not registered: %s cluster\n", m.Name)
 	}
 
-	describeTasks := m.DescribeTasks(tasks)
+	d := m.DescribeTasks(tasks)
+	describeTasks := make([]*ecs.Task, 0)
+
+	for _, v := range d {
+		// "arn:aws:ecs:ap-northeast-1:123456789:task-definition/xxxxx:1"
+		// Extracting data xxxxxx
+		if !ContainsString(
+			m.IgnoreTasks,
+			strings.Split(strings.Split(aws.StringValue(v.TaskDefinitionArn), "/")[1], ":")[0],
+		) {
+			describeTasks = append(describeTasks, v)
+		}
+	}
 
 	// Check all task in cluster
 	for _, v := range describeTasks {
@@ -90,6 +106,16 @@ func (m *Monitor) CheckTasksUpdate(task string, taskDefinitionArn *string, revis
 func IsContainsTaskName(task string, tasks []*ECSTask) bool {
 	for _, t := range tasks {
 		if task == t.Name {
+			return true
+		}
+	}
+	return false
+}
+
+// ContainsString...check to include string in the slice
+func ContainsString(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
 			return true
 		}
 	}

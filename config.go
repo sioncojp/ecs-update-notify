@@ -26,10 +26,11 @@ type Config struct {
 
 // Monitor ... set from config.toml
 type Monitor struct {
-	Name            string `toml:"name"`
-	AWSProfile      string `toml:"aws_profile"`
-	AWSRegion       string `toml:"aws_region"`
-	IncomingWebhook string `toml:"incoming_webhook"`
+	Name            string   `toml:"name"`
+	AWSProfile      string   `toml:"aws_profile"`
+	AWSRegion       string   `toml:"aws_region"`
+	IncomingWebhook string   `toml:"incoming_webhook"`
+	IgnoreTasks     []string `toml:"ignore_tasks"`
 	Tasks           []*ECSTask
 	Client          *Client
 }

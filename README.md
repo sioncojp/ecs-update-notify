@@ -30,6 +30,7 @@ name = "BarCluster"
 aws_profile = "bar"
 aws_region = "ap-northeast-1"
 incoming_webhook = "https://hooks.slack.com/services/....."
+ignore_tasks = ["xxxx"]
 ```
 
 # What would you like to solve with this?

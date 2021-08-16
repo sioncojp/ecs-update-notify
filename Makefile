@@ -10,7 +10,7 @@ darwin_arm_name	:= $(name)-darwin-arm64
 
 go_version := $(shell cat $(realpath .go-version))
 bindir     := $(realpath bin/)
-go         := $(BINDIR)/go/bin/go
+go         := $(bindir)/go/bin/go
 arch       := $(shell arch)
 
 help:
@@ -18,7 +18,7 @@ help:
 
 ### go install
 go/install: file         = go.tar.gz
-go/install: download_url = https://golang.org/dl/go$(GO_VERSION).darwin-$(ARCH).tar.gz
+go/install: download_url = https://golang.org/dl/go$(go_version).darwin-$(arch).tar.gz
 go/install:
 # If you have a different version, delete it.
 	@if [ -f $(go) ]; then \
@@ -47,7 +47,7 @@ lint: ## go lint ignore vendor
 
 
 build: go/install ## build
-	$(go) build -o $(bindir)/$(name) *.go
+	$(go) build -o bin/$(name) cmd/$(name)/*.go
 
 build/cross: go/install ## create to build for linux & darwin to bin/
 	GOOS=linux GOARCH=amd64 $(go) build -o bin/$(linux_name) $(LDFLAGS) cmd/$(name)/*.go
