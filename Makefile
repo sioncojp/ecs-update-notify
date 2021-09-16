@@ -3,9 +3,9 @@ LDFLAGS	 := -ldflags="-X \"main.Revision=$(REVISION)\""
 
 .PHONY: build-cross dist build clean run help go/* build
 
-name		:= ecs-update-notify
-linux_name	:= $(name)-linux-amd64
-darwin_name	:= $(name)-darwin-amd64
+name		    := ecs-update-notify
+linux_name  	:= $(name)-linux-amd64
+darwin_name   	:= $(name)-darwin-amd64
 darwin_arm_name	:= $(name)-darwin-arm64
 
 go_version := $(shell cat $(realpath .go-version))
@@ -34,7 +34,7 @@ go/install:
 dist: build-docker ## create .tar.gz linux & darwin to /bin
 	cd bin && tar zcvf $(linux_name).tar.gz $(linux_name) && rm -f $(linux_name)
 	cd bin && tar zcvf $(darwin_name).tar.gz $(darwin_name) && rm -f $(darwin_name)
-	cd bin && tar zcvf $(darwin_arch_name).tar.gz $(darwin_arch_name) && rm -f $(darwin_arch_name)
+	cd bin && tar zcvf $(darwin_arm_name).tar.gz $(darwin_arm_name) && rm -f $(darwin_arm_name)
 
 test: ## go test
 	$(go) test -v $$(go list ./... | grep -v /vendor/)
@@ -55,7 +55,7 @@ build/cross: go/install ## create to build for linux & darwin to bin/
 	GOOS=darwin GOARCH=arm64 $(go) build -o bin/$(darwin_arm_name) $(LDFLAGS) cmd/$(name)/*.go
 
 build-docker: ## go build on Docker
-	docker run --rm -v "$(PWD)":/go/src/github.com/sioncojp/$(name) -w /go/src/github.com/sioncojp/$(name) golang:latest bash build.sh
+	docker run --rm -v "$(PWD)":/go/src/github.com/sioncojp/$(name) -w /go/src/github.com/sioncojp/$(name) golang:$(go_version) bash build.sh
 
 run: ## go run
 	$(go) run cmd/$(name)/main.go -c examples/config.toml
