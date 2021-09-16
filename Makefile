@@ -3,10 +3,10 @@ LDFLAGS	 := -ldflags="-X \"main.Revision=$(REVISION)\""
 
 .PHONY: build-cross dist build clean run help go/* build
 
-name		    := ecs-update-notify
-linux_name  	:= $(name)-linux-amd64
-darwin_name   	:= $(name)-darwin-amd64
-darwin_arm_name	:= $(name)-darwin-arm64
+name            := ecs-update-notify
+linux_name      := $(name)-linux-amd64
+darwin_name     := $(name)-darwin-amd64
+darwin_arm_name := $(name)-darwin-arm64
 
 go_version := $(shell cat $(realpath .go-version))
 bindir     := $(realpath bin/)
